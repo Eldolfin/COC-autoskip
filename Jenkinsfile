@@ -3,35 +3,31 @@ pipeline {
 		stages {
 			stage('Checking') {
 				steps {
-					echo 'Running clippy..'
-						sh cargo clippy
+					sh '''
+					. ~/.cargo/env
+					cargo clippy
+					'''
 				}
 			}
 			stage('Build') {
 				steps {
-					echo 'Building..'
-						sh cargo build
+					sh '''
+					. ~/.cargo/env
+					cargo build
+					'''
 				}
 			}
 			stage('Test') {
 				steps {
-					echo 'Testing..'
-						sh cargo test --release
+					sh '''
+					. ~/.cargo/env
+					cargo test --release
+					'''
 				}
 			}
-			stage('Deploy') {
-				steps {
-					echo 'Deploying....'
-				}
-			}
-
 		}
 	post {
-//		success {
-//			// One or more steps need to be included within each condition's block.
-//		}
 		unsuccessful {
-			// email people who caused the build to fail
 			emailextrecipients([culprits()])
 		}
 	}
