@@ -68,9 +68,8 @@ fn preprocess(image: DynamicImage) -> DynamicImage {
     let mut image = image.adjust_contrast(f32::MAX);
     image.invert();
     image = image.resize_to_fill(
-        image.width() / 2,
-        image.height() / 2,
-        FilterType::CatmullRom,
+        106, 102,
+        FilterType::Triangle,
     );
     image
 }
@@ -148,6 +147,12 @@ mod tests {
         let expected = ressource.into();
         let filename = format!("./assets/test_images/{file_id}.png");
         let image = Reader::open(filename).unwrap().decode().unwrap();
+        
+        {
+            use super::preprocess;
+            let image = preprocess(image.clone());
+            image.save("fail.png").unwrap();
+        }
 
         let result = ressource_ocr.get_ressources(image);
         assert!(result.is_some());
