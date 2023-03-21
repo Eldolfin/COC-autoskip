@@ -1,7 +1,8 @@
-use std::{io::Cursor, fmt::Display};
+use std::{fmt::Display, io::Cursor};
 
-use crate::{CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT};
-use image::{DynamicImage, imageops::FilterType, ImageOutputFormat};
+use crate::{CROP_HEIGHT, CROP_WIDTH, CROP_X, CROP_Y};
+use colored::Colorize;
+use image::{imageops::FilterType, DynamicImage, ImageOutputFormat};
 use leptess::{LepTess, Variable};
 
 #[derive(Debug, PartialEq)]
@@ -19,11 +20,11 @@ impl RessourcesOCR {
     pub fn new() -> Self {
         let mut engine = LepTess::new(None, "eng").unwrap();
 
-        engine.set_variable(Variable::TesseditCharWhitelist, "0123456789").unwrap();
+        engine
+            .set_variable(Variable::TesseditCharWhitelist, "0123456789")
+            .unwrap();
 
-        Self {
-            engine
-        }
+        Self { engine }
     }
 
     pub fn get_ressources(&mut self, image: DynamicImage) -> Option<Ressources> {
@@ -58,7 +59,7 @@ impl RessourcesOCR {
         })
     }
 
-    fn preprocess(&self ,image: DynamicImage) -> DynamicImage {
+    fn preprocess(&self, image: DynamicImage) -> DynamicImage {
         let image = image.crop_imm(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT);
         let image = DynamicImage::ImageLuma8(image.to_luma8());
         let image = image.brighten(-98);
@@ -77,7 +78,21 @@ impl Ressources {
 
 impl Display for Ressources {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[G: {}, E: {}, DE: {}]", self.gold, self.elixir, self.dark_elixir)
+        let num_numbers = self.gold.checked_ilog10().unwrap_or(0)
+            + self.elixir.checked_ilog10().unwrap_or(0)
+            + self.dark_elixir.checked_ilog10().unwrap_or(0);
+        let padding_count = 7 + 7 + 5 - 3 - num_numbers;
+        let padding = " ".repeat(padding_count as usize);
+
+        write!(
+            f,
+            "{padding}[{}{}, {}{}, DE: {}]",
+            "G: ".bright_yellow(),
+            self.gold.to_string().bright_yellow().bold(),
+            "E: ".purple(),
+            self.elixir.to_string().purple().bold(),
+            self.dark_elixir
+        )
     }
 }
 
@@ -98,16 +113,20 @@ fn parse_ressource(ressource_str: &str, name: &str) -> Option<u32> {
 
 #[cfg(test)]
 mod tests {
+    use super::{Ressources, RessourcesOCR};
     use image::io::Reader;
     use test_case::test_case;
-    use super::{Ressources, RessourcesOCR};
 
     impl From<(u32, u32, u32)> for Ressources {
         fn from(value: (u32, u32, u32)) -> Self {
-            Self { gold: value.0, elixir: value.1, dark_elixir: value.2 }
+            Self {
+                gold: value.0,
+                elixir: value.1,
+                dark_elixir: value.2,
+            }
         }
     }
-    
+
     #[test_case(1, (89_290, 92_921, 672); "Image 1")]
     #[test_case(2, (75_326, 139_838, 0); "Image 2")]
     #[test_case(3, (96_685, 97_303, 0); "Image 3")]

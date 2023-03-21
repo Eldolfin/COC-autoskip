@@ -1,6 +1,7 @@
 use std::io::{stdout, Write};
 
 use adb::Button;
+use colored::Colorize;
 use notify_rust::{Notification, Hint};
 use ocr::{RessourcesOCR, Ressources};
 use sound::SoundEngine;
@@ -68,10 +69,10 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) -> Ressources {
         if let Some(ressources) = ressources {
             print!("Found base {ressources} ");
             if ressources.gold_and_elixir() >= wanted_total {
-                println!("It's good!");
+                println!("{}", "It's good!  😄".green().bold());
                 return ressources;
             } else {
-                println!("Skipping...");
+                println!("{}", "Skipping... ❌".red().bold());
                 random_sleep();
                 adb::click(Button::Next);
                 fails = 0;
@@ -83,7 +84,7 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) -> Ressources {
         };
 
         if fails >= MAX_DETECTION_FAILS {
-            println!("Failed to detect ressources {MAX_DETECTION_FAILS} times, skipping");
+            println!("⚠  Failed to detect ressources {MAX_DETECTION_FAILS} times, skipping");
             adb::click(Button::Next);
             fails = 0;
         }
@@ -94,7 +95,7 @@ fn notify_found(ressources: &Ressources) {
     let _ = Notification::new()
         .summary("COC autoskip")
         .appname("COC autoskip")
-        .body(&format!("A suitable village has been found with ressources: {}", ressources))
+        .body(&format!("A suitable village has been found with G+E = {}", ressources.gold_and_elixir()))
         .icon("phone-symbolic.symbolic")
         .hint(Hint::SuppressSound(true))
         .show();

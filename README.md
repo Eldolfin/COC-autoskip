@@ -26,7 +26,7 @@ This program is only made for Linux and has not been tested on other platforms.
 - [x] Add better logging, showing stats
 - [x] Comment code parameters
 - [x] Add desktop notifications
-- [ ] Add emojis and terminal colors
+- [x] Add emojis and terminal colors
 
 ## Purpose of this project:
 Spending less time playing, instead watching the computer play for you🗿
