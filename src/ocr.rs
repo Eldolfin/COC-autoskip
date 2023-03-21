@@ -32,7 +32,7 @@ impl RessourcesOCR {
         let image = preprocess(image);
 
         // the image roughly has this size so we pre-allocate the right size to gain some time
-        let mut tiff = Cursor::new(Vec::with_capacity(10690));
+        let mut tiff = Cursor::new(Vec::with_capacity(11500));
 
         image.write_to(&mut tiff, ImageOutputFormat::Tiff).unwrap();
 
@@ -147,12 +147,6 @@ mod tests {
         let expected = ressource.into();
         let filename = format!("./assets/test_images/{file_id}.png");
         let image = Reader::open(filename).unwrap().decode().unwrap();
-        
-        {
-            use super::preprocess;
-            let image = preprocess(image.clone());
-            image.save("fail.png").unwrap();
-        }
 
         let result = ressource_ocr.get_ressources(image);
         assert!(result.is_some());
