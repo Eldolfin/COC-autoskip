@@ -10,6 +10,7 @@ image = "0.24.5"
 leptess = "0.14.0"
 rand = "0.8.5"
 rodio = "0.17.1"
+notify-rust = "4.8.0"
 
 [dev-dependencies]
 test-case = "3.0.0"

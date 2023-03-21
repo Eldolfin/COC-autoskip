@@ -1,7 +1,8 @@
 use std::io::{stdout, Write};
 
 use adb::Button;
-use ocr::RessourcesOCR;
+use notify_rust::{Notification, Hint};
+use ocr::{RessourcesOCR, Ressources};
 use sound::SoundEngine;
 use utils::{input, random_sleep};
 
@@ -34,7 +35,8 @@ fn main() {
     start_attacking();
 
     loop {
-        search_loop(&mut ocr, wanted_total);
+        let ressources = search_loop(&mut ocr, wanted_total);
+        notify_found(&ressources);
         sound_engine.play_sound();
         let answer = input("Do you wish to continue searching? [y/N]");
         if !answer.to_lowercase().contains('y') {
@@ -57,7 +59,7 @@ fn start_attacking() {
     adb::click(Button::FindMatch);
 }
 
-fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) {
+fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) -> Ressources {
     let mut fails = 0;
     loop {
         let image = adb::screen_shot();
@@ -67,7 +69,7 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) {
             print!("Found base {ressources} ");
             if ressources.gold_and_elixir() >= wanted_total {
                 println!("It's good!");
-                break;
+                return ressources;
             } else {
                 println!("Skipping...");
                 random_sleep();
@@ -86,4 +88,14 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) {
             fails = 0;
         }
     }
+}
+
+fn notify_found(ressources: &Ressources) {
+    let _ = Notification::new()
+        .summary("COC autoskip")
+        .appname("COC autoskip")
+        .body(&format!("A suitable village has been found with ressources: {}", ressources))
+        .icon("phone-symbolic.symbolic")
+        .hint(Hint::SuppressSound(true))
+        .show();
 }

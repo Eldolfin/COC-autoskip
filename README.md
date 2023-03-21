@@ -18,14 +18,15 @@ and processing it using the Tesseract OCR engine.
 To use it, adb and Tesseract need to be installed, and the constants on top of the main file
 need to be changed according to your screen resolution and aspect ratio.
 
-This program is only made for linux and has not been tested on other platforms.
+This program is only made for Linux and has not been tested on other platforms.
 
 ## TODO:
 - [x] Add tests
 - [x] Pass images to OCR without saving them on the disk
 - [x] Add better logging, showing stats
 - [x] Comment code parameters
-- [ ] Add desktop notifications
+- [x] Add desktop notifications
+- [ ] Add emojis and terminal colors
 
 ## Purpose of this project:
 Spending less time playing, instead watching the computer play for you🗿
