@@ -1,38 +1,41 @@
+use std::io::{stdout, Write};
+
 use adb::Button;
 use ocr::RessourcesOCR;
-use rand::Rng;
-use rodio::source::{Buffered, Source};
-use rodio::Decoder;
-use std::io::{BufReader, Cursor};
-use std::{io::BufRead, thread::sleep, time::Duration};
+use sound::SoundEngine;
+use utils::{input, random_sleep};
 
 mod adb;
 mod ocr;
+mod sound;
+mod utils;
 
 const DEFAULT_WANTED_TOTAL: u32 = 1200000;
-
+/// max number of pixels in a box where buttons are clickable.
+/// this should almost be equal to half the size of the smallest button.
+const CLICK_RANDOM_RADIUS: u8 = 50;
+/// after this amount of failed detection, the village will simply be skipped
+const MAX_DETECTION_FAILS: u8 = 5;
+/// to find these values, take a screenshot, open an image editor and make a box around the
+/// upper left 3 values (gold, elixir and dark elixir). No other text should appear in the box!
 const CROP_X: u32 = 129;
 const CROP_Y: u32 = 181;
 const CROP_WIDTH: u32 = 342 - CROP_X;
 const CROP_HEIGHT: u32 = 380 - CROP_Y;
-
-const MAX_DETECTION_FAILS: u8 = 5;
+// finally, don't forget to change the values in adb.rs for the button positions
 
 fn main() {
+    let mut ocr = RessourcesOCR::new();
+    let sound_engine = SoundEngine::default();
+
     let wanted_total = prompt();
     println!("Starting to search for a base with {wanted_total} gold+elixir!");
-
-    let mut ocr = RessourcesOCR::new();
-    let sound = load_sound();
-    let (_stream, handle) =
-        rodio::OutputStream::try_default().expect("Output stream failed to open");
-    let sink = rodio::Sink::try_new(&handle).expect("Sink open failed");
 
     start_attacking();
 
     loop {
         search_loop(&mut ocr, wanted_total);
-        sink.append(sound.clone());
+        sound_engine.play_sound();
         let answer = input("Do you wish to continue searching? [y/N]");
         if !answer.to_lowercase().contains('y') {
             break;
@@ -42,36 +45,10 @@ fn main() {
     }
 }
 
-fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) {
-    let mut fails = 1;
-    loop {
-        let image = adb::screen_shot();
-        let ressources = ocr.get_ressources(image);
-
-        if let Some(ressources) = ressources {
-            if ressources.gold_and_elixir() >= wanted_total {
-                break;
-            }
-            random_sleep();
-            adb::click(Button::Next);
-            fails = 1;
-        } else {
-            println!("FAIL {fails}/{MAX_DETECTION_FAILS}");
-            fails += 1;
-        };
-
-        if fails > MAX_DETECTION_FAILS {
-            println!("Failed to detect ressources more than {MAX_DETECTION_FAILS} times, skipping");
-            adb::click(Button::Next);
-        }
-    }
-}
-
-fn load_sound() -> Buffered<Decoder<BufReader<Cursor<&'static [u8; 262222]>>>> {
-    let file = Cursor::new(include_bytes!("./found-soundeffect.wav"));
-    rodio::Decoder::new(BufReader::new(file))
-        .unwrap()
-        .buffered()
+fn prompt() -> u32 {
+    input(
+        &format!("Hello fellow clasher, enter the desired amount of gold+elixir you want and press enter to begin the search (default: {DEFAULT_WANTED_TOTAL})"))
+    .parse().unwrap_or(DEFAULT_WANTED_TOTAL)
 }
 
 fn start_attacking() {
@@ -80,20 +57,33 @@ fn start_attacking() {
     adb::click(Button::FindMatch);
 }
 
-fn prompt() -> u32 {
-    input(
-        &format!("Hello fellow clasher, enter the desired amount of gold+elixir you want and press enter to begin the search (default: {DEFAULT_WANTED_TOTAL})"))
-    .parse().unwrap_or(DEFAULT_WANTED_TOTAL)
-}
+fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) {
+    let mut fails = 0;
+    loop {
+        let image = adb::screen_shot();
+        let ressources = ocr.get_ressources(image);
 
-fn input(message: &str) -> String {
-    println!("{message}");
-    std::io::stdin().lock().lines().next().unwrap().unwrap()
-}
+        if let Some(ressources) = ressources {
+            print!("Found base {ressources} ");
+            if ressources.gold_and_elixir() >= wanted_total {
+                println!("It's good!");
+                break;
+            } else {
+                println!("Skipping...");
+                random_sleep();
+                adb::click(Button::Next);
+                fails = 0;
+            }
+        } else {
+            fails += 1;
+            print!("FAIL {fails}/{MAX_DETECTION_FAILS}...\r");
+            stdout().flush().unwrap();
+        };
 
-fn random_sleep() {
-    let mut rng = rand::thread_rng();
-    let ms = rng.gen_range(400..1000);
-    let duration = Duration::from_millis(ms);
-    sleep(duration);
+        if fails >= MAX_DETECTION_FAILS {
+            println!("Failed to detect ressources {MAX_DETECTION_FAILS} times, skipping");
+            adb::click(Button::Next);
+            fails = 0;
+        }
+    }
 }

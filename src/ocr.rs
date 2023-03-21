@@ -1,4 +1,4 @@
-use std::io::Cursor;
+use std::{io::Cursor, fmt::Display};
 
 use crate::{CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT};
 use image::{DynamicImage, imageops::FilterType, ImageOutputFormat};
@@ -8,7 +8,7 @@ use leptess::{LepTess, Variable};
 pub struct Ressources {
     gold: u32,
     elixir: u32,
-    _dark_elixir: u32,
+    dark_elixir: u32,
 }
 
 pub struct RessourcesOCR {
@@ -53,12 +53,12 @@ impl RessourcesOCR {
         Some(Ressources {
             gold,
             elixir,
-            _dark_elixir: dark_elixir,
+            dark_elixir,
         })
     }
 
     fn preprocess(&self ,image: DynamicImage) -> DynamicImage {
-        let image = crop(image);
+        let image = image.crop_imm(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT);
         let image = DynamicImage::ImageLuma8(image.to_luma8());
         let image = image.brighten(-98);
         let mut image = image.adjust_contrast(f32::MAX);
@@ -71,6 +71,12 @@ impl RessourcesOCR {
 impl Ressources {
     pub fn gold_and_elixir(&self) -> u32 {
         self.gold + self.elixir
+    }
+}
+
+impl Display for Ressources {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[G: {}, E: {}, DE: {}]", self.gold, self.elixir, self.dark_elixir)
     }
 }
 
@@ -89,10 +95,6 @@ fn parse_ressource(ressource_str: &str, name: &str) -> Option<u32> {
     }
 }
 
-fn crop(image: DynamicImage) -> DynamicImage {
-    image.crop_imm(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT)
-}
-
 #[cfg(test)]
 mod tests {
     use image::io::Reader;
@@ -101,7 +103,7 @@ mod tests {
 
     impl From<(u32, u32, u32)> for Ressources {
         fn from(value: (u32, u32, u32)) -> Self {
-            Self { gold: value.0, elixir: value.1, _dark_elixir: value.2 }
+            Self { gold: value.0, elixir: value.1, dark_elixir: value.2 }
         }
     }
     

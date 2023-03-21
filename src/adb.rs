@@ -1,7 +1,6 @@
 use std::{io::Cursor, process::Command};
-
 use image::{DynamicImage, ImageFormat};
-use rand::Rng;
+use crate::utils::randomize_coords;
 
 #[derive(Debug)]
 pub enum Button {
@@ -10,9 +9,11 @@ pub enum Button {
     Next,
 }
 
-type Coords = (u16, u16);
+pub type Coords = (u16, u16);
 
 impl Button {
+    /// This should be changed to, according to where these buttons are placed
+    /// on your screen. try to get the middle coordinates as there will be some randomizations!
     fn into_coords(self) -> Coords {
         match self {
             Self::Attack => (150, 1250),
@@ -50,15 +51,4 @@ pub fn click(button: Button) {
         .arg(coords.1.to_string())
         .output()
         .unwrap_or_else(|error| panic!("Failed to tap with adb: {:?}", error));
-}
-
-fn randomize_coords(coords: Coords) -> Coords {
-    let radius = 50;
-    let randx: i32 = rand::thread_rng().gen_range(-radius..=radius);
-    let randy: i32 = rand::thread_rng().gen_range(-radius..=radius);
-
-    (
-        (coords.0 as i32 + randx) as u16,
-        (coords.1 as i32 + randy) as u16,
-    )
 }

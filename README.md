@@ -23,9 +23,9 @@ This program is only made for linux and has not been tested on other platforms.
 ## TODO:
 - [x] Add tests
 - [x] Pass images to OCR without saving them on the disk
+- [x] Add better logging, showing stats
+- [x] Comment code parameters
 - [ ] Add desktop notifications
-- [ ] Add better logging, showing stats
-- [ ] Comment code
 
 ## Purpose of this project:
 Spending less time playing, instead watching the computer play for you🗿
