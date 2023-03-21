@@ -38,6 +38,7 @@ impl RessourcesOCR {
             .set_image_from_mem(tiff.get_ref())
             .unwrap_or_else(|error| panic!("Could not load image in ocr engine: {:?}", error));
 
+        // does nothing, it's just to suppress a warning
         self.engine.set_source_resolution(70);
 
         let detected_text = self.engine.get_utf8_text().unwrap();
@@ -63,7 +64,7 @@ impl RessourcesOCR {
         let image = image.brighten(-98);
         let mut image = image.adjust_contrast(f32::MAX);
         image.invert();
-        image = image.resize_to_fill(image.width() * 2, image.height() * 2, FilterType::Nearest);
+        image = image.resize_to_fill(image.width() * 3, image.height() * 3, FilterType::Nearest);
         image
     }
 }
@@ -116,11 +117,12 @@ mod tests {
     #[test_case(7, (425_486, 469_671, 5_975); "Image 7")]
     #[test_case(8, (282_095, 148_063, 3_082); "Image 8")]
     #[test_case(9, (504_887, 400_384, 1_493); "Image 9")]
+    #[test_case(10, (287_602, 204_352, 1_327); "Image 10")]
     fn get_ressources_tests(file_id: u8, ressource: (u32, u32, u32)) {
+        let mut ressource_ocr = RessourcesOCR::new();
         let expected = ressource.into();
         let filename = format!("./assets/test_images/{file_id}.png");
         let image = Reader::open(filename).unwrap().decode().unwrap();
-        let mut ressource_ocr = RessourcesOCR::new();
 
         let result = ressource_ocr.get_ressources(image);
         assert!(result.is_some());
