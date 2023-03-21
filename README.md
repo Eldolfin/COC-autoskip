@@ -20,6 +20,8 @@ need to be changed according to your screen resolution and aspect ratio.
 
 This program is only made for Linux and has not been tested on other platforms.
 
+Works just as well with wireless adb too!
+
 ## TODO:
 - [x] Add tests
 - [x] Pass images to OCR without saving them on the disk
