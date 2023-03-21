@@ -1,9 +1,9 @@
 # COC autoskip
 
 <!--toc:start-->
-- [COC autoskip](#coc-autoskip)
-  - [Todo](#todo)
-  - [Purpose of this project:](#purpose-of-this-project)
+- [How to run it](#how-to-run-it)
+- [Todo](#todo)
+- [Purpose of this project](#purpose-of-this-project)
 <!--toc:end-->
 
 Using adb, this program
@@ -21,6 +21,15 @@ need to be changed according to your screen resolution and aspect ratio.
 This program is only made for Linux and has not been tested on other platforms.
 
 Works just as well with wireless adb too!
+
+## How to run it:
+Install the rust toolchain first, then:
+```
+bash
+sudo apt-get install tesseract-ocr libtesseract-dev libasound2 libsdl2-dev clang build-essential pkg-config -y
+git clone https://github.com/Eldolfin/COC-autoskip.git && cd COC-autoskip
+cargo run --release
+```
 
 ## TODO:
 - [x] Add tests
