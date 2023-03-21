@@ -15,14 +15,17 @@ Using adb, this program
 It does it by taking a screenshot of the device, sending it to the computer
 and processing it using the Tesseract OCR engine.
 
-It's not 100% accurate at the moment, it might skip villages it shouldn't.
-But it's fairly rare.
+To use it, adb and Tesseract need to be installed, and the constants on top of the main file
+need to be changed according to your screen resolution and aspect ratio.
+
+This program is only made for linux and has not been tested on other platforms.
 
 ## TODO:
+- [x] Add tests
+- [x] Pass images to OCR without saving them on the disk
 - [ ] Add desktop notifications
 - [ ] Add better logging, showing stats
-- [ ] Pass images to OCR without saving them on the disk
-- [ ] Add tests
+- [ ] Comment code
 
 ## Purpose of this project:
 Spending less time playing, instead watching the computer play for you🗿
