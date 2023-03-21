@@ -69,7 +69,7 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) -> Ressources {
         if let Some(ressources) = ressources {
             print!("Found base {ressources} ");
             if ressources.gold_and_elixir() >= wanted_total {
-                println!("{}", "It's good!  😄".green().bold());
+                println!("{}", "It's good!  ✅".green().bold());
                 return ressources;
             } else {
                 println!("{}", "Skipping... ❌".red().bold());

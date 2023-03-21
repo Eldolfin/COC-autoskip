@@ -1,4 +1,5 @@
-use std::{fmt::Display, io::Cursor};
+use std::fmt::Display;
+use std::io::Cursor;
 
 use crate::{CROP_HEIGHT, CROP_WIDTH, CROP_X, CROP_Y};
 use colored::Colorize;
@@ -28,10 +29,10 @@ impl RessourcesOCR {
     }
 
     pub fn get_ressources(&mut self, image: DynamicImage) -> Option<Ressources> {
-        let image = self.preprocess(image);
+        let image = preprocess(image);
 
         // the image roughly has this size so we pre-allocate the right size to gain some time
-        let mut tiff = Cursor::new(Vec::with_capacity(169739));
+        let mut tiff = Cursor::new(Vec::with_capacity(11500));
 
         image.write_to(&mut tiff, ImageOutputFormat::Tiff).unwrap();
 
@@ -58,16 +59,19 @@ impl RessourcesOCR {
             dark_elixir,
         })
     }
+}
 
-    fn preprocess(&self, image: DynamicImage) -> DynamicImage {
-        let image = image.crop_imm(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT);
-        let image = DynamicImage::ImageLuma8(image.to_luma8());
-        let image = image.brighten(-98);
-        let mut image = image.adjust_contrast(f32::MAX);
-        image.invert();
-        image = image.resize_to_fill(image.width() * 3, image.height() * 3, FilterType::Nearest);
-        image
-    }
+fn preprocess(image: DynamicImage) -> DynamicImage {
+    let image = image.crop_imm(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT);
+    let image = DynamicImage::ImageLuma8(image.to_luma8());
+    let image = image.brighten(-98);
+    let mut image = image.adjust_contrast(f32::MAX);
+    image.invert();
+    image = image.resize_to_fill(
+        106, 102,
+        FilterType::Triangle,
+    );
+    image
 }
 
 impl Ressources {
@@ -137,6 +141,7 @@ mod tests {
     #[test_case(8, (282_095, 148_063, 3_082); "Image 8")]
     #[test_case(9, (504_887, 400_384, 1_493); "Image 9")]
     #[test_case(10, (287_602, 204_352, 1_327); "Image 10")]
+    #[test_case(11, (445_699, 349_948, 1_221); "Image 11")]
     fn get_ressources_tests(file_id: u8, ressource: (u32, u32, u32)) {
         let mut ressource_ocr = RessourcesOCR::new();
         let expected = ressource.into();

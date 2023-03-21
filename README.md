@@ -1,4 +1,4 @@
-# COC autoskip
+# COC autoskip [![Build Status](https://jenkins.le-dauphin.tech/buildStatus/icon?subject=tests&?job=COC+autoskip+tests)](https://jenkins.le-dauphin.tech/job/COC%20autoskip%20tests/)
 
 <!--toc:start-->
 - [How to run it](#how-to-run-it)
