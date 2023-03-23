@@ -42,7 +42,7 @@ It might not work otherwise.
 - [x] Add desktop notifications
 - [x] Add emojis and terminal colors
 - [x] Allow user to skip village from android using volume buttons
-- [ ] Enhance initial number input (maybe by asking for units of 100k)
+- [x] Enhance initial number input by asking in units of 100k
 - [ ] Add some sort of automatic adb connection
 
 ## Purpose of this project:

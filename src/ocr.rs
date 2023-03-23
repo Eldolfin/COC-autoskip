@@ -154,16 +154,6 @@ mod tests {
         let result = ressource_ocr.get_ressources(&image);
         assert!(result.is_some());
         let result = result.unwrap();
-
-        {
-            // TODO: remove this
-            use super::preprocess;
-            if result != expected {
-                let image = preprocess(&image);
-                image.save("fail.png").unwrap();
-            }
-        }
-
         assert_eq!(result, expected);
     }
 }

@@ -2,8 +2,8 @@ use std::io::{stdout, Write};
 
 use adb::Button;
 use colored::Colorize;
-use notify_rust::{Notification, Hint};
-use ocr::{RessourcesOCR, Ressources};
+use notify_rust::{Hint, Notification};
+use ocr::{Ressources, RessourcesOCR};
 use sound::SoundEngine;
 use utils::{input, random_sleep};
 
@@ -49,8 +49,9 @@ fn main() {
 
 fn prompt() -> u32 {
     input(
-        &format!("Hello fellow clasher, enter the desired amount of gold+elixir you want and press enter to begin the search (default: {DEFAULT_WANTED_TOTAL})"))
-    .parse().unwrap_or(DEFAULT_WANTED_TOTAL)
+        &format!(
+        "Hello fellow clasher, enter the desired amount of gold+elixir (in 100k) you want and press enter to begin the search (default: {DEFAULT_WANTED_TOTAL})"))
+    .parse().unwrap_or(DEFAULT_WANTED_TOTAL) * 100_000
 }
 
 fn start_attacking() {
@@ -94,7 +95,10 @@ fn notify_found(ressources: &Ressources) {
     let _ = Notification::new()
         .summary("COC autoskip")
         .appname("COC autoskip")
-        .body(&format!("A suitable village has been found with G+E = {}", ressources.gold_and_elixir()))
+        .body(&format!(
+            "A suitable village has been found with G+E = {}",
+            ressources.gold_and_elixir()
+        ))
         .icon("phone-symbolic.symbolic")
         .hint(Hint::SuppressSound(true))
         .show();
