@@ -26,10 +26,13 @@ Works just as well with wireless adb too!
 Install the rust toolchain first, then:
 ```
 bash
-sudo apt-get install tesseract-ocr libtesseract-dev libasound2 libsdl2-dev clang build-essential pkg-config -y
+sudo apt-get install libtesseract5 tesseract-ocr libtesseract-dev libasound2 libsdl2-dev clang build-essential pkg-config -y
 git clone https://github.com/Eldolfin/COC-autoskip.git && cd COC-autoskip
 cargo run --release
 ```
+
+Refer to the [Tesseract doc](https://tesseract-ocr.github.io/tessdoc/Installation.html) and make sure to install version 5.
+It might not work otherwise.
 
 ## TODO:
 - [x] Add tests
@@ -38,6 +41,9 @@ cargo run --release
 - [x] Comment code parameters
 - [x] Add desktop notifications
 - [x] Add emojis and terminal colors
+- [x] Allow user to skip village from android using volume buttons
+- [x] Enhance initial number input by asking in units of 100k
+- [ ] Add some sort of automatic adb connection
 
 ## Purpose of this project:
 Spending less time playing, instead watching the computer play for you🗿

@@ -2,10 +2,12 @@ use std::io::{stdout, Write};
 
 use adb::Button;
 use colored::Colorize;
-use notify_rust::{Notification, Hint};
-use ocr::{RessourcesOCR, Ressources};
+use notify_rust::{Hint, Notification};
+use ocr::{Ressources, RessourcesOCR};
 use sound::SoundEngine;
 use utils::{input, random_sleep};
+
+use crate::adb::wait_volume_key;
 
 mod adb;
 mod ocr;
@@ -39,19 +41,17 @@ fn main() {
         let ressources = search_loop(&mut ocr, wanted_total);
         notify_found(&ressources);
         sound_engine.play_sound();
-        let answer = input("Do you wish to continue searching? [y/N]");
-        if !answer.to_lowercase().contains('y') {
-            break;
-        } else {
-            adb::click(Button::Next);
-        }
+        println!("Do you wish to continue searching? Press volume key to continue, or interrupt the program");
+        wait_volume_key();
+        adb::click(Button::Next);
     }
 }
 
 fn prompt() -> u32 {
     input(
-        &format!("Hello fellow clasher, enter the desired amount of gold+elixir you want and press enter to begin the search (default: {DEFAULT_WANTED_TOTAL})"))
-    .parse().unwrap_or(DEFAULT_WANTED_TOTAL)
+        &format!(
+        "Hello fellow clasher, enter the desired amount of gold+elixir (in 100k) you want and press enter to begin the search (default: {DEFAULT_WANTED_TOTAL})"))
+    .parse().unwrap_or(DEFAULT_WANTED_TOTAL) * 100_000
 }
 
 fn start_attacking() {
@@ -64,7 +64,7 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) -> Ressources {
     let mut fails = 0;
     loop {
         let image = adb::screen_shot();
-        let ressources = ocr.get_ressources(image);
+        let ressources = ocr.get_ressources(&image);
 
         if let Some(ressources) = ressources {
             print!("Found base {ressources} ");
@@ -95,7 +95,10 @@ fn notify_found(ressources: &Ressources) {
     let _ = Notification::new()
         .summary("COC autoskip")
         .appname("COC autoskip")
-        .body(&format!("A suitable village has been found with G+E = {}", ressources.gold_and_elixir()))
+        .body(&format!(
+            "A suitable village has been found with G+E = {}",
+            ressources.gold_and_elixir()
+        ))
         .icon("phone-symbolic.symbolic")
         .hint(Hint::SuppressSound(true))
         .show();

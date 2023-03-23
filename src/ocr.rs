@@ -22,13 +22,13 @@ impl RessourcesOCR {
         let mut engine = LepTess::new(None, "eng").unwrap();
 
         engine
-            .set_variable(Variable::TesseditCharWhitelist, "0123456789")
+            .set_variable(Variable::TesseditCharWhitelist, "0123456789n") // n == 11 for some reason
             .unwrap();
 
         Self { engine }
     }
 
-    pub fn get_ressources(&mut self, image: DynamicImage) -> Option<Ressources> {
+    pub fn get_ressources(&mut self, image: &DynamicImage) -> Option<Ressources> {
         let image = preprocess(image);
 
         // the image roughly has this size so we pre-allocate the right size to gain some time
@@ -44,6 +44,7 @@ impl RessourcesOCR {
         self.engine.set_source_resolution(70);
 
         let detected_text = self.engine.get_utf8_text().unwrap();
+        let detected_text = detected_text.replace(' ', "").replace("n", "11");
         let mut lines = detected_text.lines();
 
         let gold = parse_ressource(lines.next()?, "gold")?;
@@ -61,7 +62,7 @@ impl RessourcesOCR {
     }
 }
 
-fn preprocess(image: DynamicImage) -> DynamicImage {
+fn preprocess(image: &DynamicImage) -> DynamicImage {
     let image = image.crop_imm(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT);
     let image = DynamicImage::ImageLuma8(image.to_luma8());
     let image = image.brighten(-98);
@@ -142,16 +143,17 @@ mod tests {
     #[test_case(9, (504_887, 400_384, 1_493); "Image 9")]
     #[test_case(10, (287_602, 204_352, 1_327); "Image 10")]
     #[test_case(11, (445_699, 349_948, 1_221); "Image 11")]
+    #[test_case(12, (112_540, 391_968, 2_427); "Image 12")]
+    #[test_case(13, (876_374, 993_356, 9_706); "Image 13")]
     fn get_ressources_tests(file_id: u8, ressource: (u32, u32, u32)) {
         let mut ressource_ocr = RessourcesOCR::new();
         let expected = ressource.into();
         let filename = format!("./assets/test_images/{file_id}.png");
         let image = Reader::open(filename).unwrap().decode().unwrap();
 
-        let result = ressource_ocr.get_ressources(image);
+        let result = ressource_ocr.get_ressources(&image);
         assert!(result.is_some());
         let result = result.unwrap();
-
         assert_eq!(result, expected);
     }
 }
