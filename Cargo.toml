@@ -1,7 +1,9 @@
 [package]
 name = "coc-autoskip"
+description = "A coc village finder for the lazies"
 version = "0.2.0"
 edition = "2021"
+license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

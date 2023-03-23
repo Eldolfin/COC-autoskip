@@ -1,6 +1,6 @@
-use std::{io::Cursor, process::Command};
-use image::{DynamicImage, ImageFormat};
 use crate::utils::randomize_coords;
+use image::{DynamicImage, ImageFormat};
+use std::{io::Cursor, process::Command};
 
 #[derive(Debug)]
 pub enum Button {
@@ -24,11 +24,7 @@ impl Button {
 }
 
 pub fn screen_shot() -> DynamicImage {
-    let pngbytes = Command::new("adb")
-        .arg("shell")
-        .arg("screencap")
-        .arg("-p")
-        .output()
+    let pngbytes = run_commmand("adb shell screencap -p".to_string())
         .unwrap_or_else(|error| panic!("Failed to take screenshot with adb: {:?}", error))
         .stdout;
 
@@ -42,13 +38,24 @@ pub fn screen_shot() -> DynamicImage {
 pub fn click(button: Button) {
     let coords = randomize_coords(button.into_coords());
 
-    Command::new("adb")
-        .arg("shell")
-        .arg("input")
-        .arg("mouse")
-        .arg("tap")
-        .arg(coords.0.to_string())
-        .arg(coords.1.to_string())
-        .output()
-        .unwrap_or_else(|error| panic!("Failed to tap with adb: {:?}", error));
+    run_commmand(format!(
+        "adb shell input mouse tap {} {}",
+        coords.0.to_string(),
+        coords.1.to_string()
+    ))
+    .unwrap_or_else(|error| panic!("Failed to tap with adb: {:?}", error));
+}
+
+pub fn wait_volume_key() {
+    run_commmand("adb logcat -c".to_string()).unwrap();
+    run_commmand("adb logcat -e vol_ -m 1".to_string()).unwrap();
+}
+
+// simplifies the creation of commands
+fn run_commmand(command: String) -> Result<std::process::Output, std::io::Error> {
+    let mut args = command.split_whitespace();
+    let mut command = Command::new(args.next().unwrap());
+    let command = command.args(args);
+
+    command.output()
 }
