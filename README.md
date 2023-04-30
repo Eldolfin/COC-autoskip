@@ -38,6 +38,7 @@ cargo run --release
 - [x] Comment code parameters
 - [x] Add desktop notifications
 - [x] Add emojis and terminal colors
+- [ ] Run Jenkins tests using the docker image
 
 ## Purpose of this project:
 Spending less time playing, instead watching the computer play for you🗿
