@@ -1,14 +1,17 @@
+use colored::Colorize;
+#[cfg(feature = "desktop_notification")]
+use notify_rust::{Hint, Notification};
 use std::io::{stdout, Write};
 
 use adb::Button;
-use colored::Colorize;
-use notify_rust::{Notification, Hint};
-use ocr::{RessourcesOCR, Ressources};
+use ocr::{Ressources, RessourcesOCR};
+#[cfg(feature = "desktop_notification")]
 use sound::SoundEngine;
 use utils::{input, random_sleep};
 
 mod adb;
 mod ocr;
+#[cfg(feature = "desktop_notification")]
 mod sound;
 mod utils;
 
@@ -24,26 +27,45 @@ const CROP_X: u32 = 129;
 const CROP_Y: u32 = 181;
 const CROP_WIDTH: u32 = 342 - CROP_X;
 const CROP_HEIGHT: u32 = 380 - CROP_Y;
+
+const ADB_IP: &str = "192.168.1.29:5555";
 // finally, don't forget to change the values in adb.rs for the button positions
 
 fn main() {
     let mut ocr = RessourcesOCR::new();
+    #[cfg(feature = "desktop_notification")]
     let sound_engine = SoundEngine::default();
 
-    let wanted_total = prompt();
+    let wanted_total = if cfg!(feature = "interactive") {
+        prompt()
+    } else {
+        DEFAULT_WANTED_TOTAL
+    };
+
     println!("Starting to search for a base with {wanted_total} gold+elixir!");
 
+    adb::connect();
     start_attacking();
 
     loop {
         let ressources = search_loop(&mut ocr, wanted_total);
+        #[cfg(feature = "desktop_notification")]
         notify_found(&ressources);
+        #[cfg(feature = "desktop_notification")]
         sound_engine.play_sound();
-        let answer = input("Do you wish to continue searching? [y/N]");
-        if !answer.to_lowercase().contains('y') {
-            break;
+
+        let answer = if cfg!(feature = "interactive") {
+            input("Do you wish to continue searching? [y/N]")
+                .to_lowercase()
+                .contains('y')
         } else {
+            false
+        };
+
+        if answer {
             adb::click(Button::Next);
+        } else {
+            break;
         }
     }
 }
@@ -91,11 +113,15 @@ fn search_loop(ocr: &mut RessourcesOCR, wanted_total: u32) -> Ressources {
     }
 }
 
+#[cfg(feature = "desktop_notification")]
 fn notify_found(ressources: &Ressources) {
     let _ = Notification::new()
         .summary("COC autoskip")
         .appname("COC autoskip")
-        .body(&format!("A suitable village has been found with G+E = {}", ressources.gold_and_elixir()))
+        .body(&format!(
+            "A suitable village has been found with G+E = {}",
+            ressources.gold_and_elixir()
+        ))
         .icon("phone-symbolic.symbolic")
         .hint(Hint::SuppressSound(true))
         .show();
