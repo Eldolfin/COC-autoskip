@@ -6,12 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = "0.24.6"
+image = {version = "0.24.6", default-features = false, features = ["png", "tiff"] }
 leptess = "0.14.0"
 rand = "0.8.5"
-rodio = "0.17.1"
-notify-rust = "4.8.0"
 colored = "2.0.0"
 
+rodio = { version = "0.17.1", optional = true }
+notify-rust = { version = "4.8.0", optional = true }
+
+[features]
+desktop_notifications = ["dep:rodio", "dep:notify-rust"]
+interactive = []
+
 [dev-dependencies]
-test-case = "3.0.0"
+test-case = "3.1.0"
