@@ -1,6 +1,6 @@
-use std::{io::Cursor, process::Command};
+use crate::{utils::randomize_coords, ADB_IP};
 use image::{DynamicImage, ImageFormat};
-use crate::utils::randomize_coords;
+use std::{io::Cursor, process::Command};
 
 #[derive(Debug)]
 pub enum Button {
@@ -51,4 +51,12 @@ pub fn click(button: Button) {
         .arg(coords.1.to_string())
         .output()
         .unwrap_or_else(|error| panic!("Failed to tap with adb: {:?}", error));
+}
+
+pub fn connect() {
+    Command::new("adb")
+        .arg("connect")
+        .arg(ADB_IP)
+        .output()
+        .unwrap_or_else(|err| panic!("Failed to execute adb connect {:?}", err));
 }

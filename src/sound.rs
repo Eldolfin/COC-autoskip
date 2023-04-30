@@ -1,7 +1,7 @@
 use rodio::source::Buffered;
 use rodio::Sink;
-use std::io::{Cursor, BufReader};
-use rodio::{OutputStream, Decoder, Source};
+use rodio::{Decoder, OutputStream, Source};
+use std::io::{BufReader, Cursor};
 
 pub struct SoundEngine {
     // not used but cannot be drop or sound doesnt work
@@ -23,7 +23,7 @@ impl Default for SoundEngine {
         let sound_file = Cursor::new(include_bytes!("./found-soundeffect.wav"));
         let sound = Decoder::new(BufReader::new(sound_file)).unwrap().buffered();
 
-        Self { 
+        Self {
             _stream,
             sink,
             sound_effect: sound,
