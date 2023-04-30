@@ -19,4 +19,4 @@ desktop_notifications = ["dep:rodio", "dep:notify-rust"]
 interactive = []
 
 [dev-dependencies]
-test-case = "3.0.0"
+test-case = "3.1.0"
