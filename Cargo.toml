@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = {version = "0.24.6", default-features = false, features = ["png", "tiff"] }
+image = {version = "0.24.7", default-features = false, features = ["png", "tiff"] }
 leptess = "0.14.0"
 rand = "0.8.5"
 colored = "2.0.0"
