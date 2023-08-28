@@ -12,7 +12,7 @@ rand = "0.8.5"
 colored = "2.0.0"
 
 rodio = { version = "0.17.1", optional = true }
-notify-rust = { version = "4.8.0", optional = true }
+notify-rust = { version = "4.9.0", optional = true }
 
 [features]
 desktop_notifications = ["dep:rodio", "dep:notify-rust"]
